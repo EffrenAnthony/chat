@@ -1,3 +1,13 @@
-<p>
-  lista-usuarios works!
-</p>
+
+<button class="btn btn-danger btn-block" (click)="cerrarSesion()">
+  Cerrar Sesion
+</button>
+<hr>
+<h1>Usuarios</h1>
+<hr>
+<ul class="list-group">
+  <li *ngFor="let usuario of usuariosConectados"
+      class = "list-group-item">
+    {{usuario.nombre}}
+  </li>
+</ul>

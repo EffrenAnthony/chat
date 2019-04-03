@@ -38,7 +38,7 @@ export class LoginComponent implements OnInit {
   iniciarSesionFB(){
     FB.login((response)=>{
       if(response.authResponse){
-        // ? Significa que se inicio secion de forma exitosa    
+        // ? Significa que se inicio sesion de forma exitosa    
         console.log(response.authResponse);
         this.getUserDetails(response.authResponse.userID);
             
@@ -46,6 +46,7 @@ export class LoginComponent implements OnInit {
         console.log("Error al iniciar Sesion");
         
       }
+      
     })
   }
 
@@ -60,11 +61,23 @@ export class LoginComponent implements OnInit {
                         console.log("Exito");
                         console.log(response);  
                         this.nombre = response.name;
+                        localStorage.setItem('usuario',JSON.stringify(response))
+                        // this.ingresar();
+                        // Mismo comportamiento de la funcion infresar
+                        // pero no enviamos un evento
+                        this._sWebsocket.loginWs(this.nombre);
+                        this._router.navigateByUrl("/mensajes");
                        })
   }
 
-  ingresar(){
+  ingresar(evento){
+    evento.preventDefault();
     this._sWebsocket.loginWs(this.nombre);
     this._router.navigateByUrl("/mensajes");
+  }
+
+  cerrarSesion(){
+    this._sWebsocket.cerrarSesion();
+    this._router.navigateByUrl("/");
   }
 }

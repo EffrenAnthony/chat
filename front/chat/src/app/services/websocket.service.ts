@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { log } from 'util';
+import { Usuario } from '../models/usuario';
+import { Router } from '@angular/router';
+
 
 @Injectable({
   providedIn: 'root'
@@ -8,11 +11,19 @@ import { log } from 'util';
 export class WebsocketService {
 
   public socketStatus = false;
+  public usuario:Usuario = new Usuario('');
 
-  constructor(private socketService:Socket) {
+  constructor(private socketService:Socket,private _router:Router) {
     this.checkStatus();
+    this.cargarStorage();
    }
 
+   cargarStorage(){
+     if(localStorage.getItem("usuario")){
+       this.usuario.nombre = JSON.parse(localStorage.getItem("usuario")).nombre;
+       this.loginWs(this.usuario.nombre);
+     }
+   }
    //* Verifica el estado del socket - si se encuentra conectado o desconectado
   checkStatus(){
     this.socketService.on("connect",()=>{
@@ -26,7 +37,7 @@ export class WebsocketService {
   }
   
   //* Se coloca el nombre en un string, el nombre del evento se recibe por la función
-  emitir(evento:string, payload:any){
+  emitir(evento:string, payload?:any){
     //* payload es el contenido del evento a emitir
     //* La funcion que emite el evento es "emit() de socketService"
     this.socketService.emit(evento,payload);
@@ -45,11 +56,27 @@ export class WebsocketService {
    */
   loginWs(nombre:string){
     console.log("Configurando al usuario",nombre);
-    let usuario = {
-      nombre:nombre
-    }
-    this.emitir("Configurar usuario",usuario)
+    this.usuario = new Usuario(nombre);
+    this.emitir("configurar-usuario",this.usuario);
+    this.guardarStorage();
     
   } 
+  loignFB(nombre:string){
+    console.log("Configurando al usuario",nombre);
+    this.usuario = new Usuario(nombre);
+    this.emitir("configurar-usuario",this.usuario);
+  }
+
+  guardarStorage(){
+    localStorage.setItem('usuario',JSON.stringify(this.usuario));
+  }
+
+  cerrarSesion(){
+    this.usuario = null;
+    localStorage.removeItem('usuario');
+    this._router.navigateByUrl("/");
+    this.emitir('cerrar-sesion');
+  }
 }
+
 
